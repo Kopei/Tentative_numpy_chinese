@@ -1,0 +1,1269 @@
+Tentative NumPy Tutorial 
+试探性NumPy教程
+
+Please do not hesitate to click the edit button. You will need to create a User Account first.
+
+目录
+
+    Prerequisites
+    The Basics
+        An example
+        Array Creation
+        Printing Arrays
+        Basic Operations
+        Universal Functions
+        Indexing, Slicing and Iterating
+    Shape Manipulation
+        Changing the shape of an array
+        Stacking together different arrays
+        Splitting one array into several smaller ones
+    Copies and Views
+        No Copy at All
+        View or Shallow Copy
+        Deep Copy
+        Functions and Methods Overview
+    Less Basic
+        Broadcasting rules
+    Fancy indexing and index tricks
+        Indexing with Arrays of Indices
+        Indexing with Boolean Arrays
+        The ix_() function
+        Indexing with strings
+    Linear Algebra
+        Simple Array Operations
+        The Matrix Class
+        Indexing: Comparing Matrices and 2D Arrays
+    Tricks and Tips
+        "Automatic" Reshaping
+        Vector Stacking
+        Histograms
+    References
+
+Prerequisites
+前提要求
+Before reading this tutorial you should know a bit of Python. If you would like to refresh your memory, take a look at the Python tutorial.
+在你看本教程之前，你需要知道一些python的知识。如果你想要刷新你的记忆，请看看python tutorial
+
+If you wish to work the examples in this tutorial, you must also have some software installed on your computer. Minimally:
+你也需要安装以下模块，以便于本教程的例子运行。
+
+    Python
+
+    NumPy 
+
+These you may find useful:
+你可能也需要以下模块：
+
+    ipython is an enhanced interactive Python shell which is very convenient for exploring NumPy's features
+	ipython是一个增强型的python shell，方便探索numpy的特性
+    matplotlib will enable you to plot graphics
+	matplotlib能让你画图
+    SciPy provides a lot of scientific routines that work on top of NumPy 
+	scipy在numpy基础上提供大量科学计算函数
+
+The Basics
+基础
+NumPy's main object is the homogeneous multidimensional array. It is a table of elements (usually numbers), all of the same type, indexed by a tuple of positive integers. In Numpy dimensions are called axes. The number of axes is rank.
+numpy的主要对象是均质多维阵列。它是一个元素表（主要是数字），相同类型，可以被正整数元组索引。在numpy中，维度称为轴，轴的数量是秩。
+For example, the coordinates of a point in 3D space [1, 2, 1] is an array of rank 1, because it has one axis. That axis has a length of 3. In example pictured below, the array has rank 2 (it is 2-dimensional). The first dimension (axis) has a length of 2, the second dimension has a length of 3.
+比如说，一个三维点的坐标[1,2,1]是一个秩为1的阵列，因为它只有一个轴。轴的长度是3.下面这个例子是一个2维阵列，秩为2.第一维长度是2，第二维长度是3.
+[[ 1., 0., 0.],
+ [ 0., 1., 2.]]
+
+Numpy's array class is called ndarray. It is also known by the alias array. Note that numpy.array is not the same as the Standard Python Library class array.array, which only handles one-dimensional arrays and offers less functionality. The more important attributes of an ndarray object are:
+numpy的阵列类叫做ndarray。也被称为别名阵列。注意，numpy.array不同于标准python库中的array.array，标准库阵列只能处理一维阵列，提供较少功能。ndarray提供主要的特征有：
+
+ndarray.ndim
+
+    the number of axes (dimensions) of the array. In the Python world, the number of dimensions is referred to as rank. 
+    代表阵列轴的数量。在python的世界里，维度的数量用秩来表示。
+
+ndarray.shape
+
+    the dimensions of the array. This is a tuple of integers indicating the size of the array in each dimension. For a matrix with n rows and m columns, shape will be (n,m). The length of the shape tuple is therefore the rank, or number of dimensions, ndim. 
+    阵列的维度。这是一个整数的元组，整数代表每个维度阵列的大小。对于一个矩阵n*m, shape的大小是（n,m）。元组中数字的个数就是ndim,阵列的维度或秩。
+
+ndarray.size
+    
+    the total number of elements of the array. This is equal to the product of the elements of shape. 
+    阵列全部元素的数量。元素shape的乘积。
+
+ndarray.dtype
+    
+    an object describing the type of the elements in the array. One can create or specify dtype's using standard Python types. Additionally NumPy provides types of its own. numpy.int32, numpy.int16, and numpy.float64 are some examples. 
+    代表一个对象描述阵列中元素的类型。你可以使用标准python类型创建或指定dtype。另外，numpy提供自己的类型，numpy.int32,numpy.int16,numpy.float64 就是几个类型。
+
+ndarray.itemsize
+
+    the size in bytes of each element of the array. For example, an array of elements of type float64 has itemsize 8 (=64/8), while one of type complex32 has itemsize 4 (=32/8). It is equivalent to ndarray.dtype.itemsize. 
+    阵列中每个元素的byte大小。比如，一个阵列的元素是float64类型，itemsize是8，而complex32的itemsize是4. 这等同于ndarray.dtype.itemsize.
+
+ndarray.data
+
+    the buffer containing the actual elements of the array. Normally, we won't need to use this attribute because we will access the elements in an array using indexing facilities. 
+    buffer中存储着实际阵列元素。正常情况下，我们不需要使用这个属性，因为我们能通过索引得到元素。
+
+An example
+
+>>> from numpy  import *
+>>> a = arange(15).reshape(3, 5)
+>>> a
+array([[ 0,  1,  2,  3,  4],
+       [ 5,  6,  7,  8,  9],
+       [10, 11, 12, 13, 14]])
+>>> a.shape
+(3, 5)
+>>> a.ndim
+2
+>>> a.dtype.name
+'int32'
+>>> a.itemsize
+4
+>>> a.size
+15
+>>> type(a)
+numpy.ndarray
+>>> b = array([6, 7, 8])
+>>> b
+array([6, 7, 8])
+>>> type(b)
+numpy.ndarray
+
+Array Creation
+创建阵列
+There are several ways to create arrays.
+有几种创建阵列的方法。
+For example, you can create an array from a regular Python list or tuple using the array function. The type of the resulting array is deduced from the type of the elements in the sequences.
+比如你可以用用numpy.array函数对普通的python列表或元组创建阵列，阵列的类型是从原序列中元素的类型演变而来。
+
+
+>>> from numpy  import *
+>>> a = array( [2,3,4] )
+>>> a
+array([2, 3, 4])
+>>> a.dtype
+dtype('int32')
+>>> b = array([1.2, 3.5, 5.1])
+>>> b.dtype
+dtype('float64')
+
+A frequent error consists in calling array with multiple numeric arguments, rather than providing a single list of numbers as an argument.
+一个常见的错误是调用array是赋予了多个数字参数，而不是仅仅提供一个数字列表。
+>>> a = array(1,2,3,4)    # WRONG
+
+>>> a = array([1,2,3,4])  # RIGHT
+
+array transforms sequences of sequences into two-dimensional arrays, sequences of sequences of sequences into three-dimensional arrays, and so on.
+array函数会转化列表中的2D序列成2维阵列，3D序列成3维阵列。
+>>> b = array( [ (1.5,2,3), (4,5,6) ] )
+>>> b
+array([[ 1.5,  2. ,  3. ],
+       [ 4. ,  5. ,  6. ]])
+
+The type of the array can also be explicitly specified at creation time:
+阵列的类型也可以被显式的确定。
+>>> c = array( [ [1,2], [3,4] ], dtype=complex )
+>>> c
+array([[ 1.+0.j,  2.+0.j],
+       [ 3.+0.j,  4.+0.j]])
+
+Often, the elements of an array are originally unknown, but its size is known. Hence, NumPy offers several functions to create arrays with initial placeholder content. These minimize the necessity of growing arrays, an expensive operation.
+通常，阵列的元素不可知，但是它的大小确定。所以，numpy提供了几种函数用于初始化阵列。这些函数方便了生成阵列的需求。
+The function zeros creates an array full of zeros, the function ones creates an array full of ones, and the function empty creates an array whose initial content is random and depends on the state of the memory. By default, the dtype of the created array is float64.
+zeros函数创建了全零阵列，ones()函数创建全1阵列。empty()函数创建初始化不确定，取决于机器内存的阵列。dtype是float64.
+>>> zeros( (3,4) )
+array([[0.,  0.,  0.,  0.],
+       [0.,  0.,  0.,  0.],
+       [0.,  0.,  0.,  0.]])
+>>> ones( (2,3,4), dtype=int16 )                # dtype can also be specified
+array([[[ 1, 1, 1, 1],
+        [ 1, 1, 1, 1],
+        [ 1, 1, 1, 1]],
+       [[ 1, 1, 1, 1],
+        [ 1, 1, 1, 1],
+        [ 1, 1, 1, 1]]], dtype=int16)
+>>> empty( (2,3) )
+array([[  3.73603959e-262,   6.02658058e-154,   6.55490914e-260],
+       [  5.30498948e-313,   3.14673309e-307,   1.00000000e+000]])
+
+To create sequences of numbers, NumPy provides a function analogous to range that returns arrays instead of lists
+为了创建序列的数字，numpy提供了一个类似range的函数，返回array而不是list。
+>>> arange( 10, 30, 5 )
+array([10, 15, 20, 25])
+>>> arange( 0, 2, 0.3 )                 # it accepts float arguments
+array([ 0. ,  0.3,  0.6,  0.9,  1.2,  1.5,  1.8])
+
+When arange is used with floating point arguments, it is generally not possible to predict the number of elements obtained, due to the finite floating point precision. For this reason, it is usually better to use the function linspace that receives as an argument the number of elements that we want, instead of the step:
+当arange()用于浮点数，通常不可能预测元素的个数，这是由于有限的浮点精度。出于这个原因，通常最好使用linspace()函数，用于具体我们想要的元素个数，而不是使用步长：
+
+>>> linspace( 0, 2, 9 )                 # 9 numbers from 0 to 2
+array([ 0.  ,  0.25,  0.5 ,  0.75,  1.  ,  1.25,  1.5 ,  1.75,  2.  ])
+>>> x = linspace( 0, 2*pi, 100 )        # useful to evaluate function at lots of points
+>>> f = sin(x)
+
+See also
+另见
+    array, zeros, zeros_like, ones, ones_like, empty, empty_like, arange, linspace, rand, randn, fromfunction, fromfile 
+
+Printing Arrays
+打印阵列
+When you print an array, NumPy displays it in a similar way to nested lists, but with the following layout:
+当你打印阵列时，numpy展示的是类似嵌套列表，不过有如下布局：
+
+    the last axis is printed from left to right,
+    最后轴从左到右打印，
+    the second-to-last is printed from top to bottom,
+    倒数第二轴从上到下打印，
+    the rest are also printed from top to bottom, with each slice separated from the next by an empty line. 
+    剩下的轴从上到下打印，每一切片用一空行分开。
+One-dimensional arrays are then printed as rows, bidimensionals as matrices and tridimensionals as lists of matrices.
+所以一维阵列被打印成行，而2维、3维都打印成矩阵列表。
+>>> a = arange(6)                         # 1d array
+>>> print a
+[0 1 2 3 4 5]
+>>>
+>>> b = arange(12).reshape(4,3)           # 2d array
+>>> print b
+[[ 0  1  2]
+ [ 3  4  5]
+ [ 6  7  8]
+ [ 9 10 11]]
+>>>
+>>> c = arange(24).reshape(2,3,4)         # 3d array
+>>> print c
+[[[ 0  1  2  3]
+  [ 4  5  6  7]
+  [ 8  9 10 11]]
+
+ [[12 13 14 15]
+  [16 17 18 19]
+  [20 21 22 23]]]
+
+See below to get more details on reshape.
+以下可以得到更多reshape的信息
+If an array is too large to be printed, NumPy automatically skips the central part of the array and only prints the corners:
+如果阵列过大，numpy自动只显示角落的信息。
+
+>>> print arange(10000)
+[   0    1    2 ..., 9997 9998 9999]
+>>>
+>>> print arange(10000).reshape(100,100)
+[[   0    1    2 ...,   97   98   99]
+ [ 100  101  102 ...,  197  198  199]
+ [ 200  201  202 ...,  297  298  299]
+ ...,
+ [9700 9701 9702 ..., 9797 9798 9799]
+ [9800 9801 9802 ..., 9897 9898 9899]
+ [9900 9901 9902 ..., 9997 9998 9999]]
+
+To disable this behaviour and force NumPy to print the entire array, you can change the printing options using set_printoptions.
+强制numpy打印全部阵列，可以设置set_printoptions
+>>> set_printoptions(threshold='nan')
+
+Basic Operations
+基本运算
+Arithmetic operators on arrays apply elementwise. A new array is created and filled with the result.
+对于阵列元素的算术操作将逐个进行，一个新阵列将展示结果。
+>>> a = array( [20,30,40,50] )
+>>> b = arange( 4 )
+>>> b
+array([0, 1, 2, 3])
+>>> c = a-b
+>>> c
+array([20, 29, 38, 47])
+>>> b**2
+array([0, 1, 4, 9])
+>>> 10*sin(a)
+array([ 9.12945251, -9.88031624,  7.4511316 , -2.62374854])
+>>> a<35
+array([True, True, False, False], dtype=bool)
+
+Unlike in many matrix languages, the product operator * operates elementwise in NumPy arrays. The matrix product can be performed using the dot function or creating matrix objects ( see matrix section of this tutorial ).
+不像许多矩阵语言，numpy的*乘是逐元素相乘，dot()点积才是矩阵相乘。
+>>> A = array( [[1,1],
+...             [0,1]] )
+>>> B = array( [[2,0],
+...             [3,4]] )
+>>> A*B                         # elementwise product
+array([[2, 0],
+       [0, 4]])
+>>> dot(A,B)                    # matrix product
+array([[5, 4],
+       [3, 4]])
+
+Some operations, such as += and *=, act in place to modify an existing array rather than create a new one.
+在一些操作符中，+=和*=仅仅对现在的阵列作用，而不是创建新阵列。
+>>> a = ones((2,3), dtype=int)
+>>> b = random.random((2,3))
+>>> a *= 3
+>>> a
+array([[3, 3, 3],
+       [3, 3, 3]])
+>>> b += a
+>>> b
+array([[ 3.69092703,  3.8324276 ,  3.0114541 ],
+       [ 3.18679111,  3.3039349 ,  3.37600289]])
+>>> a += b                                  # b is converted to integer type
+>>> a
+array([[6, 6, 6],
+       [6, 6, 6]])
+
+When operating with arrays of different types, the type of the resulting array corresponds to the more general or precise one (a behavior known as upcasting).
+当对不同阵列类型操作时，结果阵列的类型时更通常或更精确的类型，也被称为向上转型。
+>>> a = ones(3, dtype=int32)
+>>> b = linspace(0,pi,3)
+>>> b.dtype.name
+'float64'
+>>> c = a+b
+>>> c
+array([ 1.        ,  2.57079633,  4.14159265])
+>>> c.dtype.name
+'float64'
+>>> d = exp(c*1j)
+>>> d
+array([ 0.54030231+0.84147098j, -0.84147098+0.54030231j,
+       -0.54030231-0.84147098j])
+>>> d.dtype.name
+'complex128'
+
+Many unary operations, such as computing the sum of all the elements in the array, are implemented as methods of the ndarray class.
+很多归一阵列操作，比如计算阵列中元素的和，可以用numpy中函数实现。
+>>> a = random.random((2,3))
+>>> a
+array([[ 0.6903007 ,  0.39168346,  0.16524769],
+       [ 0.48819875,  0.77188505,  0.94792155]])
+>>> a.sum()
+3.4552372100521485
+>>> a.min()
+0.16524768654743593
+>>> a.max()
+0.9479215542670073
+
+By default, these operations apply to the array as though it were a list of numbers, regardless of its shape. However, by specifying the axis parameter you can apply an operation along the specified axis of an array:
+默认情况下，这些操作对全部的元素都有效，不管其形态。当然，通过指定轴参数，你可以仅仅对阵列某个轴的元素作用。
+>>> b = arange(12).reshape(3,4)
+>>> b
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>>
+>>> b.sum(axis=0)                            # sum of each column
+array([12, 15, 18, 21])
+>>>
+>>> b.min(axis=1)                            # min of each row
+array([0, 4, 8])
+>>>
+>>> b.cumsum(axis=1)                         # cumulative sum along each row
+array([[ 0,  1,  3,  6],
+       [ 4,  9, 15, 22],
+       [ 8, 17, 27, 38]])
+
+Universal Functions
+通用函数
+NumPy provides familiar mathematical functions such as sin, cos, and exp. In NumPy, these are called "universal functions"(ufunc). Within NumPy, these functions operate elementwise on an array, producing an array as output.
+numpy提供相似的数学函数，比如sin,cos和exp. 在numpy中，这些函数叫做通用函数。这些函数逐个对元素操作。
+>>> B = arange(3)
+>>> B
+array([0, 1, 2])
+>>> exp(B)
+array([ 1.        ,  2.71828183,  7.3890561 ])
+>>> sqrt(B)
+array([ 0.        ,  1.        ,  1.41421356])
+>>> C = array([2., -1., 4.])
+>>> add(B, C)
+array([ 2.,  0.,  6.])
+
+See also
+另见
+
+    all, alltrue, any, apply along axis, argmax, argmin, argsort, average, bincount, ceil, clip, conj, conjugate, corrcoef, cov, cross, cumprod, cumsum, diff, dot, floor, inner, inv, lexsort, max, maximum, mean, median, min, minimum, nonzero, outer, prod, re, round, sometrue, sort, std, sum, trace, transpose, var, vdot, vectorize, where 
+
+Indexing, Slicing and Iterating
+索引，切片，迭代
+One-dimensional arrays can be indexed, sliced and iterated over, much like lists and other Python sequences.
+一维阵列可以被索引，切片，迭代。很像list和其他python序列
+>>> a = arange(10)**3
+>>> a
+array([  0,   1,   8,  27,  64, 125, 216, 343, 512, 729])
+>>> a[2]
+8
+>>> a[2:5]
+array([ 8, 27, 64])
+>>> a[:6:2] = -1000    # equivalent to a[0:6:2] = -1000; from start to position 6, exclusive, set every 2nd element to -1000
+>>> a
+array([-1000,     1, -1000,    27, -1000,   125,   216,   343,   512,   729])
+>>> a[ : :-1]                                 # reversed a
+array([  729,   512,   343,   216,   125, -1000,    27, -1000,     1, -1000])
+>>> for i in a:
+...         print i**(1/3.),
+...
+nan 1.0 nan 3.0 nan 5.0 6.0 7.0 8.0 9.0
+
+Multidimensional arrays can have one index per axis. These indices are given in a tuple separated by commas:
+多维阵列可以索引每个轴的序号，序号用元组给出。
+>>> def f(x,y):
+...         return 10*x+y
+...
+>>> b = fromfunction(f,(5,4),dtype=int)
+>>> b
+array([[ 0,  1,  2,  3],
+       [10, 11, 12, 13],
+       [20, 21, 22, 23],
+       [30, 31, 32, 33],
+       [40, 41, 42, 43]])
+>>> b[2,3]
+23
+>>> b[0:5, 1]                       # each row in the second column of b
+array([ 1, 11, 21, 31, 41])
+>>> b[ : ,1]                        # equivalent to the previous example
+array([ 1, 11, 21, 31, 41])
+>>> b[1:3, : ]                      # each column in the second and third row of b
+array([[10, 11, 12, 13],
+       [20, 21, 22, 23]])
+
+When fewer indices are provided than the number of axes, the missing indices are considered complete slices:
+当少于轴个数的下标数，缺少的坐标系数默认补全。
+>>> b[-1]                                  # the last row. Equivalent to b[-1,:]
+array([40, 41, 42, 43])
+
+The expression within brackets in b[i] is treated as an i followed by as many instances of : as needed to represent the remaining axes. NumPy also allows you to write this using dots as b[i,...].
+表达式b[i]将被认成b[i:],后面缺几个坐标轴就补几个：。numpy也允许你点来代替。
+The dots (...) represent as many colons as needed to produce a complete indexing tuple. For example, if x is a rank 5 array (i.e., it has 5 axes), then
+括号中的点代表了一个完整坐标元组所需的轴，比如一个阵列的秩为5，那么
+    x[1,2,...] is equivalent to x[1,2,:,:,:],
+
+    x[...,3] to x[:,:,:,:,3] and
+
+    x[4,...,5,:] to x[4,:,:,5,:]. 
+
+>>> c = array( [ [[  0,  1,  2],               # a 3D array (two stacked 2D arrays)
+...               [ 10, 12, 13]],
+...
+...              [[100,101,102],
+...               [110,112,113]] ] )
+>>> c.shape
+(2, 2, 3)
+>>> c[1,...]                                   # same as c[1,:,:] or c[1]
+array([[100, 101, 102],
+       [110, 112, 113]])
+>>> c[...,2]                                   # same as c[:,:,2]
+array([[  2,  13],
+       [102, 113]])
+
+Iterating over multidimensional arrays is done with respect to the first axis:
+在多维阵列中迭代是基于第一个轴的：
+>>> for row in b:
+...         print row
+...
+[0 1 2 3]
+[10 11 12 13]
+[20 21 22 23]
+[30 31 32 33]
+[40 41 42 43]
+
+However, if one wants to perform an operation on each element in the array, one can use the flat attribute which is an iterator over all the elements of the array:
+当然，如果你需要对阵列中每一个元素都做操作，可以使用flat属性，它是一个迭代器，历遍所有的元素。
+>>> for element in b.flat:
+...         print element,
+...
+0 1 2 3 10 11 12 13 20 21 22 23 30 31 32 33 40 41 42 43
+
+See also
+另见
+    [], ..., newaxis, ndenumerate, indices, index exp 
+
+Shape Manipulation
+形状操作
+Changing the shape of an array
+改变一个阵列的形状
+An array has a shape given by the number of elements along each axis:
+一个阵列的形状对应于它轴上的元素
+
+>>> a = floor(10*random.random((3,4)))
+>>> a
+array([[ 7.,  5.,  9.,  3.],
+       [ 7.,  2.,  7.,  8.],
+       [ 6.,  8.,  3.,  2.]])
+>>> a.shape
+(3, 4)
+
+The shape of an array can be changed with various commands:
+阵列的形状可以用各种函数改变：
+>>> a.ravel() # flatten the array
+array([ 7.,  5.,  9.,  3.,  7.,  2.,  7.,  8.,  6.,  8.,  3.,  2.])
+>>> a.shape = (6, 2)
+>>> a.transpose()
+array([[ 7.,  9.,  7.,  7.,  6.,  3.],
+       [ 5.,  3.,  2.,  8.,  8.,  2.]])
+
+The order of the elements in the array resulting from ravel() is normally "C-style", that is, the rightmost index "changes the fastest", so the element after a[0,0] is a[0,1]. If the array is reshaped to some other shape, again the array is treated as "C-style". Numpy normally creates arrays stored in this order, so ravel() will usually not need to copy its argument, but if the array was made by taking slices of another array or created with unusual options, it may need to be copied. The functions ravel() and reshape() can also be instructed, using an optional argument, to use FORTRAN-style arrays, in which the leftmost index changes the fastest.
+ravel()函数的阵列元素排序是通常的C-style。也就是最右边的最快改变。所以a[0,0]元素后改变的是a[0,1].如果阵列被改变成其它形状，同样按照C-style顺序。通常情况下，numpy创建的阵列按这个顺序，所以ravel()不需要参数，但是如果一个阵列是从另一个阵列切片而来或通过特定选项创建，参数可能需要复制进来。ravel()和reshape()函数也可以被可选参数指定使用FORTRAN格式阵列，这种格式是以最左边元素最先改变。
+The reshape function returns its argument with a modified shape, whereas the resize method modifies the array itself:
+reshape返回一个新改变过的阵列，而resize()对原来的阵列改变。
+>>> a
+array([[ 7.,  5.],
+       [ 9.,  3.],
+       [ 7.,  2.],
+       [ 7.,  8.],
+       [ 6.,  8.],
+       [ 3.,  2.]])
+>>> a.resize((2,6))
+>>> a
+array([[ 7.,  5.,  9.,  3.,  7.,  2.],
+       [ 7.,  8.,  6.,  8.,  3.,  2.]])
+
+If a dimension is given as -1 in a reshaping operation, the other dimensions are automatically calculated:
+如果在一个维度中赋值-1，那么包括其及其后维度会被自动计算（依据之前已给的维度）
+>>> a.reshape(3,-1)
+array([[ 7.,  5.,  9.,  3.],
+       [ 7.,  2.,  7.,  8.],
+       [ 6.,  8.,  3.,  2.]])
+
+See also:: shape example, reshape example, resize example, ravel example
+另见：shape例子，reshape例子，resize例子，ravel例子
+
+Stacking together different arrays
+叠堆不同阵列
+Several arrays can be stacked together along different axes:
+几个阵列可以叠成一个阵列,沿着不同的轴。
+>>> a = floor(10*random.random((2,2)))
+>>> a
+array([[ 1.,  1.],
+       [ 5.,  8.]])
+>>> b = floor(10*random.random((2,2)))
+>>> b
+array([[ 3.,  3.],
+       [ 6.,  0.]])
+>>> vstack((a,b))
+array([[ 1.,  1.],
+       [ 5.,  8.],
+       [ 3.,  3.],
+       [ 6.,  0.]])
+>>> hstack((a,b))
+array([[ 1.,  1.,  3.,  3.],
+       [ 5.,  8.,  6.,  0.]])
+
+The function column_stack stacks 1D arrays as columns into a 2D array. It is equivalent to vstack only for 1D arrays:
+column_stack函数把一维的阵列的列叠成2维。等同于vstack叠堆一维阵列。
+>>> column_stack((a,b))   # With 2D arrays
+array([[ 1.,  1.,  3.,  3.],
+       [ 5.,  8.,  6.,  0.]])
+>>> a=array([4.,2.])
+>>> b=array([2.,8.])
+>>> a[:,newaxis]  # This allows to have a 2D columns vector
+array([[ 4.],
+       [ 2.]])
+>>> column_stack((a[:,newaxis],b[:,newaxis]))
+array([[ 4.,  2.],
+       [ 2.,  8.]])
+>>> vstack((a[:,newaxis],b[:,newaxis])) # The behavior of vstack is different
+array([[ 4.],
+       [ 2.],
+       [ 2.],
+       [ 8.]])
+
+The function row_stack, on the other hand, stacks 1D arrays as rows into a 2D array.
+row_stack函数相反，把一维阵列作为行叠成二维阵列。
+For arrays of with more than two dimensions, hstack stacks along their second axes, vstack stacks along their first axes, and concatenate allows for an optional arguments giving the number of the axis along which the concatenation should happen.
+对于多于2维的阵列，hstack阵列的第二轴，vstack随着阵列第一轴，并用一个可选参数连接。
+Note
+注意
+In complex cases, r_[] and c_[] are useful for creating arrays by stacking numbers along one axis. They allow the use of range literals (":") :
+在复杂的案例中，r_[]和c_[]用于创建一轴阵列叠堆十分有用。他们可以使用范围字符：
+    >>> r_[1:4,0,4]
+    array([1, 2, 3, 0, 4])
+
+When used with arrays as arguments, r_[] and c_[] are similar to vstack and hstack in their default behavior, but allow for an optional argument giving the number of the axis along which to concatenate.
+当使用阵列作为参数，r_[]和r_[]在默认情况下相似于vstack和hstack，不过允许额外对于轴的参数用于连接。
+See also: hstack example, vstack exammple, column_stack example, row_stack example, concatenate example, c_ example, r_ example
+另见：hstack,vstack,column_stack,row_stack,concatenate,c_和r_例子。
+Splitting one array into several smaller ones
+把一个阵列分成多个
+Using hsplit, you can split an array along its horizontal axis, either by specifying the number of equally shaped arrays to return, or by specifying the columns after which the division should occur:
+使用hsplit，你可以分开一个阵列沿着水平轴，要么通过指定相同形状阵列返回，要么通过指定哪一列后需要分离：
+>>> a = floor(10*random.random((2,12)))
+>>> a
+array([[ 8.,  8.,  3.,  9.,  0.,  4.,  3.,  0.,  0.,  6.,  4.,  4.],
+       [ 0.,  3.,  2.,  9.,  6.,  0.,  4.,  5.,  7.,  5.,  1.,  4.]])
+>>> hsplit(a,3)   # Split a into 3
+[array([[ 8.,  8.,  3.,  9.],
+       [ 0.,  3.,  2.,  9.]]), array([[ 0.,  4.,  3.,  0.],
+       [ 6.,  0.,  4.,  5.]]), array([[ 0.,  6.,  4.,  4.],
+       [ 7.,  5.,  1.,  4.]])]
+>>> hsplit(a,(3,4))   # Split a after the third and the fourth column
+[array([[ 8.,  8.,  3.],
+       [ 0.,  3.,  2.]]), array([[ 9.],
+       [ 9.]]), array([[ 0.,  4.,  3.,  0.,  0.,  6.,  4.,  4.],
+       [ 6.,  0.,  4.,  5.,  7.,  5.,  1.,  4.]])]
+
+vsplit splits along the vertical axis, and array split allows one to specify along which axis to split.
+vsplit沿着垂直轴分开，同时阵列允许从哪一轴开始分离。
+Copies and Views
+复制和视觉
+When operating and manipulating arrays, their data is sometimes copied into a new array and sometimes not. This is often a source of confusion for beginners. There are three cases:
+当计算和操作阵列时，它们的数据是有时被复制到一个新阵列，有时不是。对于新学者，这个可能有些疑惑。以下是三个案例：
+No Copy at All
+没有复制
+Simple assignments make no copy of array objects or of their data.
+简单的赋值不会做阵列对象复制，也不会对其数据复制。
+>>> a = arange(12)
+>>> b = a            # no new object is created
+>>> b is a           # a and b are two names for the same ndarray object
+True
+>>> b.shape = 3,4    # changes the shape of a
+>>> a.shape
+(3, 4)
+
+Python passes mutable objects as references, so function calls make no copy.
+python传递相互对象作为参考，所以没有复制。
+>>> def f(x):
+...     print id(x)
+...
+>>> id(a)                           # id is a unique identifier of an object
+148293216
+>>> f(a)
+148293216
+
+View or Shallow Copy
+视觉或浅复制
+Different array objects can share the same data. The view method creates a new array object that looks at the same data.
+不同的阵列可以分享相同的数据，view()函数创建一个新阵列，指向相同数据。
+>>> c = a.view()
+>>> c is a
+False
+>>> c.base is a                        # c is a view of the data owned by a
+True
+>>> c.flags.owndata
+False
+>>>
+>>> c.shape = 2,6                      # a's shape doesn't change
+>>> a.shape
+(3, 4)
+>>> c[0,4] = 1234                      # a's data changes
+>>> a
+array([[   0,    1,    2,    3],
+       [1234,    5,    6,    7],
+       [   8,    9,   10,   11]])
+
+Slicing an array returns a view of it:
+切片一个阵列返回阵列的view：
+>>> s = a[ : , 1:3]     # spaces added for clarity; could also be written "s = a[:,1:3]"
+>>> s[:] = 10           # s[:] is a view of s. Note the difference between s=10 and s[:]=10
+>>> a
+array([[   0,   10,   10,    3],
+       [1234,   10,   10,    7],
+       [   8,   10,   10,   11]])
+
+Deep Copy
+深复制
+The copy method makes a complete copy of the array and its data.
+copy函数复制完整的阵列和数据。
+>>> d = a.copy()                          # a new array object with new data is created
+>>> d is a
+False
+>>> d.base is a                           # d doesn't share anything with a
+False
+>>> d[0,0] = 9999
+>>> a
+array([[   0,   10,   10,    3],
+       [1234,   10,   10,    7],
+       [   8,   10,   10,   11]])
+
+Functions and Methods Overview
+函数和方法总览
+Here is a list of NumPy functions and methods names ordered in some categories. The names link to the Numpy Example List so that you can see the functions in action.
+以下是numpy函数和方法的列表，以类型排序。对应的链接可以让你马上看到其功能。
+Array Creation
+阵列创建
+    arange, array, copy, empty, empty_like, eye, fromfile, fromfunction, identity, linspace, logspace, mgrid, ogrid, ones, ones_like, r , zeros, zeros_like 
+
+Conversions
+转换
+    astype, atleast 1d, atleast 2d, atleast 3d, mat 
+
+Manipulations
+操作
+    array split, column stack, concatenate, diagonal, dsplit, dstack, hsplit, hstack, item, newaxis, ravel, repeat, reshape, resize, squeeze, swapaxes, take, transpose, vsplit, vstack 
+
+Questions
+疑问
+
+    all, any, nonzero, where 
+
+Ordering
+顺序
+    argmax, argmin, argsort, max, min, ptp, searchsorted, sort 
+
+Operations
+计算
+    choose, compress, cumprod, cumsum, inner, fill, imag, prod, put, putmask, real, sum 
+
+Basic Statistics
+基本统计
+    cov, mean, std, var 
+
+Basic Linear Algebra
+基本线性算术
+    cross, dot, outer, svd, vdot 
+
+
+Less Basic
+基本
+Broadcasting rules
+广播规则
+Broadcasting allows universal functions to deal in a meaningful way with inputs that do not have exactly the same shape.
+广播允许通用函数用有意义的方式处理输入，输入可以是不一样的形状。
+
+The first rule of broadcasting is that if all input arrays do not have the same number of dimensions, a "1" will be repeatedly prepended to the shapes of the smaller arrays until all the arrays have the same number of dimensions.
+广播的第一条规则是如果所有输入维度不同，1会被填到较小阵列中，直到所有阵列有相同的维度。
+The second rule of broadcasting ensures that arrays with a size of 1 along a particular dimension act as if they had the size of the array with the largest shape along that dimension. The value of the array element is assumed to be the same along that dimension for the "broadcast" array.
+第二条规则是广播确保大小为1的阵列在某一维度和最大形状其维度有相同的操作，对于相同维度保证它们元素相同。
+After application of the broadcasting rules, the sizes of all arrays must match. More details can be found in this documentation.
+在广播操作后，所有阵列的大小必须一致。更多细节可以在此看到。http://wiki.scipy.org/EricsBroadcastingDoc
+
+Fancy indexing and index tricks
+索引技巧
+NumPy offers more indexing facilities than regular Python sequences. In addition to indexing by integers and slices, as we saw before, arrays can be indexed by arrays of integers and arrays of booleans.
+相对于python序列numpy提供更多索引工具。除了通过整数和切片索引，阵列也可以被整数阵列和布尔阵列索引。
+
+Indexing with Arrays of Indices
+通过阵列指数索引
+>>> a = arange(12)**2                          # the first 12 square numbers
+>>> i = array( [ 1,1,3,8,5 ] )                 # an array of indices
+>>> a[i]                                       # the elements of a at the positions i
+array([ 1,  1,  9, 64, 25])
+>>>
+>>> j = array( [ [ 3, 4], [ 9, 7 ] ] )         # a bidimensional array of indices
+>>> a[j]                                       # the same shape as j
+array([[ 9, 16],
+       [81, 49]])
+
+When the indexed array a is multidimensional, a single array of indices refers to the first dimension of a. The following example shows this behavior by converting an image of labels into a color image using a palette.
+当索引的阵列是多维，单阵列指数对应第一维，下面这个例子展示了如何转化一个图像标签到彩色图像，使用palette
+>>> palette = array( [ [0,0,0],                # black
+...                    [255,0,0],              # red
+...                    [0,255,0],              # green
+...                    [0,0,255],              # blue
+...                    [255,255,255] ] )       # white
+>>> image = array( [ [ 0, 1, 2, 0 ],           # each value corresponds to a color in the palette
+...                  [ 0, 3, 4, 0 ]  ] )
+>>> palette[image]                            # the (2,4,3) color image
+array([[[  0,   0,   0],
+        [255,   0,   0],
+        [  0, 255,   0],
+        [  0,   0,   0]],
+       [[  0,   0,   0],
+        [  0,   0, 255],
+        [255, 255, 255],
+        [  0,   0,   0]]])
+
+We can also give indexes for more than one dimension. The arrays of indices for each dimension must have the same shape.
+我们可以用多于一维的指数坐标来索引，阵列的坐标必须相同形状。
+>>> a = arange(12).reshape(3,4)
+>>> a
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>> i = array( [ [0,1],                        # indices for the first dim of a
+...              [1,2] ] )
+>>> j = array( [ [2,1],                        # indices for the second dim
+...              [3,3] ] )
+>>>
+>>> a[i,j]                                     # i and j must have equal shape
+array([[ 2,  5],
+       [ 7, 11]])
+>>>
+>>> a[i,2]
+array([[ 2,  6],
+       [ 6, 10]])
+>>>
+>>> a[:,j]                                     # i.e., a[ : , j]
+array([[[ 2,  1],
+        [ 3,  3]],
+       [[ 6,  5],
+        [ 7,  7]],
+       [[10,  9],
+        [11, 11]]])
+
+Naturally, we can put i and j in a sequence (say a list) and then do the indexing with the list.
+通常，我们我们把i,j放入一个序列（list)然后对列表做索引。
+>>> l = [i,j]
+>>> a[l]                                       # equivalent to a[i,j]
+array([[ 2,  5],
+       [ 7, 11]])
+
+However, we can not do this by putting i and j into an array, because this array will be interpreted as indexing the first dimension of a.
+但是我们不能把i,j让入阵列，因为这个阵列会被解释成索引第一维的a。
+>>> s = array( [i,j] )
+>>> a[s]                                       # not what we want
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+IndexError: index (3) out of range (0<=index<=2) in dimension 0
+>>>
+>>> a[tuple(s)]                                # same as a[i,j]
+array([[ 2,  5],
+       [ 7, 11]])
+
+Another common use of indexing with arrays is the search of the maximum value of time-dependent series :
+另一个常见的用法是索引阵列时查找时间相关最大值系列：
+>>> time = linspace(20, 145, 5)                 # time scale
+>>> data = sin(arange(20)).reshape(5,4)         # 4 time-dependent series
+>>> time
+array([  20.  ,   51.25,   82.5 ,  113.75,  145.  ])
+>>> data
+array([[ 0.        ,  0.84147098,  0.90929743,  0.14112001],
+       [-0.7568025 , -0.95892427, -0.2794155 ,  0.6569866 ],
+       [ 0.98935825,  0.41211849, -0.54402111, -0.99999021],
+       [-0.53657292,  0.42016704,  0.99060736,  0.65028784],
+       [-0.28790332, -0.96139749, -0.75098725,  0.14987721]])
+>>>
+>>> ind = data.argmax(axis=0)                   # index of the maxima for each series
+>>> ind
+array([2, 0, 3, 1])
+>>>
+>>> time_max = time[ ind]                       # times corresponding to the maxima
+>>>
+>>> data_max = data[ind, xrange(data.shape[1])] # => data[ind[0],0], data[ind[1],1]...
+>>>
+>>> time_max
+array([  82.5 ,   20.  ,  113.75,   51.25])
+>>> data_max
+array([ 0.98935825,  0.84147098,  0.99060736,  0.6569866 ])
+>>>
+>>> all(data_max == data.max(axis=0))
+True
+
+You can also use indexing with arrays as a target to assign to:
+你也可以索引一个阵列，然后作为目标赋值给它
+>>> a = arange(5)
+>>> a
+array([0, 1, 2, 3, 4])
+>>> a[[1,3,4]] = 0
+>>> a
+array([0, 0, 2, 0, 0])
+
+However, when the list of indices contains repetitions, the assignment is done several times, leaving behind the last value:
+当然，当列表的坐标包含重复的值，赋值将被多次进行，最后一次赋值有效。
+
+>>> a = arange(5)
+>>> a[[0,0,2]]=[1,2,3]
+>>> a
+array([2, 1, 3, 3, 4])
+
+This is reasonable enough, but watch out if you want to use Python's += construct, as it may not do what you expect:
+这是情有可原的，但是注意当你使用+=结构时，其输出可能和你想象不一样
+>>> a = arange(5)
+>>> a[[0,0,2]]+=1
+>>> a
+array([1, 1, 3, 3, 4])
+
+Even though 0 occurs twice in the list of indices, the 0th element is only incremented once. This is because Python requires "a+=1" to be equivalent to "a=a+1".
+上面这个例子虽然0出现了2次，但是0位置的元素仅仅被加了1次，这是因为python要求a+=1等于a=a+1
+
+Indexing with Boolean Arrays
+用布尔阵列索引
+When we index arrays with arrays of (integer) indices we are providing the list of indices to pick. With boolean indices the approach is different; we explicitly choose which items in the array we want and which ones we don't.
+使用布尔阵列索引时，我们显示地选择哪些项我们需要，哪些不需要。不想阵列坐标索引。
+The most natural way one can think of for boolean indexing is to use boolean arrays that have the same shape as the original array:
+最自然的布尔索引是对相同的阵列形状索引。
+>>> a = arange(12).reshape(3,4)
+>>> b = a > 4
+>>> b                                          # b is a boolean with a's shape
+array([[False, False, False, False],
+       [False, True, True, True],
+       [True, True, True, True]], dtype=bool)
+>>> a[b]                                       # 1d array with the selected elements
+array([ 5,  6,  7,  8,  9, 10, 11])
+
+This property can be very useful in assignments:
+这个属性可以在赋值时十分有用
+>>> a[b] = 0                                   # All elements of 'a' higher than 4 become 0
+>>> a
+array([[0, 1, 2, 3],
+       [4, 0, 0, 0],
+       [0, 0, 0, 0]])
+
+You can look at the Mandelbrot set example to see how to use boolean indexing to generate an image of the Mandelbrot set.
+你可以看一看Mandelbrot集合例子，看看如何用布尔索引产生Mandelbrot集合图像。
+The second way of indexing with booleans is more similar to integer indexing; for each dimension of the array we give a 1D boolean array selecting the slices we want.
+另一个布尔索引的方式类似整数索引；对于每一个阵列的维度，我们使用1维布尔阵列来选择我们想要的切片。
+>>> a = arange(12).reshape(3,4)
+>>> b1 = array([False,True,True])             # first dim selection
+>>> b2 = array([True,False,True,False])       # second dim selection
+>>>
+>>> a[b1,:]                                   # selecting rows
+array([[ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>>
+>>> a[b1]                                     # same thing
+array([[ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+>>>
+>>> a[:,b2]                                   # selecting columns
+array([[ 0,  2],
+       [ 4,  6],
+       [ 8, 10]])
+>>>
+>>> a[b1,b2]                                  # a weird thing to do
+array([ 4, 10])
+
+Note that the length of the 1D boolean array must coincide with the length of the dimension (or axis) you want to slice. In the previous example, b1 is a 1-rank array with length 3 (the number of rows in a), and b2 (of length 4) is suitable to index the 2nd rank (columns) of a.
+注意到，一维布尔阵列必须和你想要切片的阵列维度一致。在之前的例子，b1是秩为1的阵列，长度为3.b2也是正好和a的列长度相同。
+
+The ix_() function
+ix_()函数
+The ix_ function can be used to combine different vectors so as to obtain the result for each n-uplet. For example, if you want to compute all the a+b*c for all the triplets taken from each of the vectors a, b and c:
+ix_函数可以用来组合不同向量，用来得到每个分片的结果。比如，如果你想计算所有从向量a,b,c中得到分片，计算a*b*c的积
+>>> a = array([2,3,4,5])
+>>> b = array([8,5,4])
+>>> c = array([5,4,6,8,3])
+>>> ax,bx,cx = ix_(a,b,c)
+>>> ax
+array([[[2]],
+
+       [[3]],
+
+       [[4]],
+
+       [[5]]])
+>>> bx
+array([[[8],
+        [5],
+        [4]]])
+>>> cx
+array([[[5, 4, 6, 8, 3]]])
+>>> ax.shape, bx.shape, cx.shape
+((4, 1, 1), (1, 3, 1), (1, 1, 5))
+>>> result = ax+bx*cx
+>>> result
+array([[[42, 34, 50, 66, 26],
+        [27, 22, 32, 42, 17],
+        [22, 18, 26, 34, 14]],
+       [[43, 35, 51, 67, 27],
+        [28, 23, 33, 43, 18],
+        [23, 19, 27, 35, 15]],
+       [[44, 36, 52, 68, 28],
+        [29, 24, 34, 44, 19],
+        [24, 20, 28, 36, 16]],
+       [[45, 37, 53, 69, 29],
+        [30, 25, 35, 45, 20],
+        [25, 21, 29, 37, 17]]])
+>>> result[3,2,4]
+17
+>>> a[3]+b[2]*c[4]
+17
+
+You could also implement the reduce as follows:
+
+def ufunc_reduce(ufct, *vectors):
+    vs = ix_(*vectors)
+    r = ufct.identity
+    for v in vs:
+        r = ufct(r,v)
+    return r
+
+and then use it as:
+
+>>> ufunc_reduce(add,a,b,c)
+array([[[15, 14, 16, 18, 13],
+        [12, 11, 13, 15, 10],
+        [11, 10, 12, 14,  9]],
+       [[16, 15, 17, 19, 14],
+        [13, 12, 14, 16, 11],
+        [12, 11, 13, 15, 10]],
+       [[17, 16, 18, 20, 15],
+        [14, 13, 15, 17, 12],
+        [13, 12, 14, 16, 11]],
+       [[18, 17, 19, 21, 16],
+        [15, 14, 16, 18, 13],
+        [14, 13, 15, 17, 12]]])
+
+The advantage of this version of reduce compared to the normal ufunc.reduce is that it makes use of the Broadcasting Rules in order to avoid creating an argument array the size of the output times the number of vectors.
+这个版本的reduce相比ufunc.reduce的优势是它利用广播规则以达到防止创建输出阵列大小是向量倍数的参数阵列。
+
+Indexing with strings
+用字符串索引
+See RecordArrays.
+
+Linear Algebra
+线性代数
+Work in progress. Basic linear algebra to be included here.
+Simple Array Operations
+简单阵列操作
+See linalg.py in numpy folder for more.
+请看更多linalg.py
+>>> from numpy import *
+>>> from numpy.linalg import *
+
+>>> a = array([[1.0, 2.0], [3.0, 4.0]])
+>>> print a
+[[ 1.  2.]
+ [ 3.  4.]]
+
+>>> a.transpose()
+array([[ 1.,  3.],
+       [ 2.,  4.]])
+
+>>> inv(a)
+array([[-2. ,  1. ],
+       [ 1.5, -0.5]])
+
+>>> u = eye(2) # unit 2x2 matrix; "eye" represents "I"
+>>> u
+array([[ 1.,  0.],
+       [ 0.,  1.]])
+>>> j = array([[0.0, -1.0], [1.0, 0.0]])
+
+>>> dot (j, j) # matrix product
+array([[-1.,  0.],
+       [ 0., -1.]])
+
+>>> trace(u)  # trace
+2.0
+
+>>> y = array([[5.], [7.]])
+>>> solve(a, y)
+array([[-3.],
+       [ 4.]])
+
+>>> eig(j)
+(array([ 0.+1.j,  0.-1.j]),
+array([[ 0.70710678+0.j,  0.70710678+0.j],
+       [ 0.00000000-0.70710678j,  0.00000000+0.70710678j]]))
+Parameters:
+    square matrix
+
+Returns
+    The eigenvalues, each repeated according to its multiplicity.
+
+    The normalized (unit "length") eigenvectors, such that the
+    column ``v[:,i]`` is the eigenvector corresponding to the
+    eigenvalue ``w[i]`` .
+
+The Matrix Class
+矩阵类
+Here is a short intro to the Matrix class.
+以下是简单矩阵类介绍
+>>> A = matrix('1.0 2.0; 3.0 4.0')
+>>> A
+[[ 1.  2.]
+ [ 3.  4.]]
+>>> type(A)  # file where class is defined
+<class 'numpy.matrixlib.defmatrix.matrix'>
+
+>>> A.T  # transpose
+[[ 1.  3.]
+ [ 2.  4.]]
+
+>>> X = matrix('5.0 7.0')
+>>> Y = X.T
+>>> Y
+[[5.]
+ [7.]]
+
+>>> print A*Y  # matrix multiplication
+[[19.]
+ [43.]]
+
+>>> print A.I  # inverse
+[[-2.   1. ]
+ [ 1.5 -0.5]]
+
+>>> solve(A, Y)  # solving linear equation
+matrix([[-3.],
+        [ 4.]])
+
+Indexing: Comparing Matrices and 2D Arrays
+索引：比较矩阵和2维阵列
+Note that there are some important differences between NumPy arrays and matrices. NumPy provides two fundamental objects: an N-dimensional array object and a universal function object. Other objects are built on top of these. In particular, matrices are 2-dimensional array objects that inherit from the NumPy array object. For both arrays and matrices, indices must consist of a proper combination of one or more of the following: integer scalars, ellipses, a list of integers or boolean values, a tuple of integers or boolean values, and a 1-dimensional array of integer or boolean values. A matrix can be used as an index for matrices, but commonly an array, list, or other form is needed to accomplish a given task.
+注意：numpy阵列和矩阵有一些不同。numpy提供2个基本对象：N维阵列对象和通用函数对象。其他对象都是建立其上。特别地，矩阵是继承2维阵列对象。对于阵列和矩阵，坐标指数必须由合适的下列一个或多个组合而成：整数阶，椭圆，整数列表或布尔值，元组整数或布尔值，和一维整数阵列或布尔值。一个矩阵可以被用来索引另一个矩阵，但是通常阵列、列表或其它格式是用来完成给定任务的。
+As usual in Python, indexing is zero-based. Traditionally we represent a 2D array or matrix as a rectangular array of rows and columns, where movement along axis 0 is movement across rows, while movement along axis 1 is movement across columns.
+就如同普通python，索引是基于0的。传统我们代表2为阵列或矩阵是一个行列的矩形，在0轴移动就是在行移动，在列移动就是在1轴动。
+Let's make an array and matrix to slice:
+让我们切片一个阵列和矩阵：
+>>> A = arange(12)
+>>> A
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+>>> A.shape = (3,4)
+>>> M = mat(A.copy())
+>>> print type(A),"  ",type(M)
+<type 'numpy.ndarray'>    <class 'numpy.core.defmatrix.matrix'>
+>>> print A
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+>>> print M
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+
+Now, let's take some simple slices. Basic slicing uses slice objects or integers. For example, the evaluation of A[:] and M[:] will appear familiar from Python indexing, however it is important to note that slicing NumPy arrays does *not* make a copy of the data; slicing provides a new view of the same data.
+现在我们做一些简单切片，基本切片使用切片对象或整数。比如，A[:]和M[:]的评估出现相似情况。但是注意，切片numpy对象不会产生数据的副本；切片提供相同数据的view。
+>>> print A[:]; print A[:].shape
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+(3, 4)
+>>> print M[:]; print M[:].shape
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+(3, 4)
+
+Now for something that differs from Python indexing: you may use comma-separated indices to index along multiple axes at the same time.
+现在是一些切片的不同之处，你可以同时使用逗号和多轴索引
+>>> print A[:,1]; print A[:,1].shape
+[1 5 9]
+(3,)
+>>> print M[:,1]; print M[:,1].shape
+[[1]
+ [5]
+ [9]]
+(3, 1)
+
+Notice the difference in the last two results. Use of a single colon for the 2D array produces a 1-dimensional array, while for a matrix it produces a 2-dimensional matrix. A slice of a matrix will always produce a matrix. For example, a slice M[2,:] produces a matrix of shape (1,4). In contrast, a slice of an array will always produce an array of the lowest possible dimension. For example, if C were a 3-dimensional array, C[...,1] produces a 2D array while C[1,:,1] produces a 1-dimensional array. From this point on, we will show results only for the array slice if the results for the corresponding matrix slice are identical.
+注意到后两个结果的差异。对2维阵列使用冒号产生1维阵列，而矩阵产生2维矩阵。矩阵的切片总是产生矩阵。比如，C是一个三维阵列，C[...,1]产生2维阵列，而C[1,:,1]产生一维阵列。在这点上，我们将展示对阵列的切片和对应矩阵切片是一样的情况。
+Lets say that we wanted the 1st and 3rd column of an array. One way is to slice using a list:
+比如我们想要阵列的第一和第三列。一个方法是：
+>>> A[:,[1,3]]
+array([[ 1,  3],
+       [ 5,  7],
+       [ 9, 11]])
+
+A slightly more complicated way is to use the take() method:
+take()函数略复杂
+>>> A[:,].take([1,3],axis=1)
+array([[ 1,  3],
+       [ 5,  7],
+       [ 9, 11]])
+
+If we wanted to skip the first row, we could use:
+如果我们想跳过第一行
+>>> A[1:,].take([1,3],axis=1)
+array([[ 5,  7],
+       [ 9, 11]])
+
+Or we could simply use A[1:,[1,3]]. Yet another way to slice the above is to use a cross product:
+或者仅仅使用A[1:[1,3]].另一个产生如上结果是使用叉乘
+>>> A[ix_((1,2),(1,3))]
+array([[ 5,  7],
+       [ 9, 11]])
+
+For the reader's convenience, here is our array again:
+
+>>> print A
+[[ 0  1  2  3]
+ [ 4  5  6  7]
+ [ 8  9 10 11]]
+
+Now let's do something a bit more complicated. Lets say that we want to retain all columns where the first row is greater than 1. One way is to create a boolean index:
+现在我们来点跟复杂的。比如我们想要获得所有第一行大于1的列。一个方法是建立布尔索引：
+>>> A[0,:]>1
+array([False, False, True, True], dtype=bool)
+>>> A[:,A[0,:]>1]
+array([[ 2,  3],
+       [ 6,  7],
+       [10, 11]])
+
+Just what we wanted! But indexing the matrix is not so convenient.
+这就是我们想要的，但是索引矩阵就有点复杂
+>>> M[0,:]>1
+matrix([[False, False, True, True]], dtype=bool)
+>>> M[:,M[0,:]>1]
+matrix([[2, 3]])
+
+The problem of course is that slicing the matrix slice produced a matrix. But matrices have a convenient 'A' attribute whose value is the array representation, so we can just do this instead:
+问题在于切片矩阵产生的是矩阵，但是矩阵正好有个’A‘属性，它的值是代表阵列，所以我们可以这么做：
+>>> M[:,M.A[0,:]>1]
+matrix([[ 2,  3],
+        [ 6,  7],
+        [10, 11]])
+
+If we wanted to conditionally slice the matrix in two directions, we must adjust our strategy slightly. Instead of
+如果我们想有条件的切片矩阵，在2个方向，我们必须调节策略。
+>>> A[A[:,0]>2,A[0,:]>1]
+array([ 6, 11])
+>>> M[M.A[:,0]>2,M.A[0,:]>1]
+matrix([[ 6, 11]])
+
+we need to use the cross product 'ix_':
+我们需要使用叉乘
+>>> A[numpy.ix_(A[:,0]>2,A[0,:]>1)]
+array([[ 6,  7],
+       [10, 11]])
+>>> M[numpy.ix_(M.A[:,0]>2,M.A[0,:]>1)]
+matrix([[ 6,  7],
+        [10, 11]])
+
+Tricks and Tips
+技巧和提示
+Here we give a list of short and useful tips.
+以下有一些简短但是有用的提示
+"Automatic" Reshaping
+'自动'变形
+To change the dimensions of an array, you can omit one of the sizes which will then be deduced automatically:
+要改变阵列的维度，你可以忽略其中一个维度大小，它会自动演绎出来。
+>>> a = arange(30)
+>>> a.shape = 2,-1,3  # -1 means "whatever is needed"
+>>> a.shape
+(2, 5, 3)
+>>> a
+array([[[ 0,  1,  2],
+        [ 3,  4,  5],
+        [ 6,  7,  8],
+        [ 9, 10, 11],
+        [12, 13, 14]],
+       [[15, 16, 17],
+        [18, 19, 20],
+        [21, 22, 23],
+        [24, 25, 26],
+        [27, 28, 29]]])
+
+Vector Stacking
+向量叠
+How do we construct a 2D array from a list of equally-sized row vectors? In MATLAB this is quite easy: if x and y are two vectors of the same length you only need do m=[x;y]. In NumPy this works via the functions column_stack, dstack, hstack and vstack, depending on the dimension in which the stacking is to be done. For example:
+我们怎么样从一个相同大小的行向量组成2维阵列呢？在matlab中，很简单，如果x和y是相同长度的向量，你只需m=[x;y]。在numpy中可以通过column_stack,dstack,hstack和vstack，使用哪个函数取决于在哪个维度你要叠成。
+x = arange(0,10,2)                     # x=([0,2,4,6,8])
+y = arange(5)                          # y=([0,1,2,3,4])
+m = vstack([x,y])                      # m=([[0,2,4,6,8],
+                                       #     [0,1,2,3,4]])
+xy = hstack([x,y])                     # xy =([0,2,4,6,8,0,1,2,3,4])
+
+The logic behind those functions in more than two dimensions can be strange.
+在逻辑上多于2维使用这些函数就会比较奇怪。
+
+See also NumPy for Matlab Users and add your new findings there. ;-)
+另见numpy给matlab的用户说明，寻找新发现
+Histograms
+柱形图
+The NumPy histogram function applied to an array returns a pair of vectors: the histogram of the array and the vector of bins. Beware: matplotlib also has a function to build histograms (called hist, as in Matlab) that differs from the one in NumPy. The main difference is that pylab.hist plots the histogram automatically, while numpy.histogram only generates the data.
+numpy的histogram()函数运用于阵列返回一对向量:柱形图阵列和数据向量。注意：matplotlib也可以创建柱形图（在matlab中叫hist），但是和numpy的不同。主要的区别是pylab.hist自动画柱形图，而numpy.histogram仅仅产生数据。
+
+import numpy
+import pylab
+# Build a vector of 10000 normal deviates with variance 0.5^2 and mean 2
+mu, sigma = 2, 0.5
+v = numpy.random.normal(mu,sigma,10000)
+# Plot a normalized histogram with 50 bins
+pylab.hist(v, bins=50, normed=1)       # matplotlib version (plot)
+pylab.show()
+# Compute the histogram with numpy and then plot it
+(n, bins) = numpy.histogram(v, bins=50, normed=True)  # NumPy version (no plot)
+pylab.plot(.5*(bins[1:]+bins[:-1]), n)
+pylab.show()
+
+References
+
+    The Python tutorial.
+
+    The Numpy Example List.
+
+    The nonexistent NumPy Tutorial at scipy.org, where we can find the old Numeric documentation.
+
+    The Guide to NumPy book.
+
+    The SciPy Tutorial and a SciPy course online
+
+    NumPy for Matlab Users.
+
+    A matlab, R, IDL, NumPy/SciPy dictionary. 
